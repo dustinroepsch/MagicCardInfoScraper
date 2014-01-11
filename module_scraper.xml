@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_scraper" default="compile.module.scraper">
+  <dirname property="module.scraper.basedir" file="${ant.file.module_scraper}"/>
+  
+  <property name="module.jdk.home.scraper" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.scraper" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.scraper" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.scraper" value="${compiler.args}"/>
+  
+  <property name="scraper.output.dir" value="${module.scraper.basedir}/out/production/Scraper"/>
+  <property name="scraper.testoutput.dir" value="${module.scraper.basedir}/out/test/Scraper"/>
+  
+  <path id="scraper.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="scraper.module.production.classpath">
+    <path refid="${module.jdk.classpath.scraper}"/>
+    <path refid="library.jsoup-1.7.3.classpath"/>
+  </path>
+  
+  <path id="scraper.runtime.production.module.classpath">
+    <pathelement location="${scraper.output.dir}"/>
+    <path refid="library.jsoup-1.7.3.classpath"/>
+  </path>
+  
+  <path id="scraper.module.classpath">
+    <path refid="${module.jdk.classpath.scraper}"/>
+    <pathelement location="${scraper.output.dir}"/>
+    <path refid="library.jsoup-1.7.3.classpath"/>
+  </path>
+  
+  <path id="scraper.runtime.module.classpath">
+    <pathelement location="${scraper.testoutput.dir}"/>
+    <pathelement location="${scraper.output.dir}"/>
+    <path refid="library.jsoup-1.7.3.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.scraper">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.scraper">
+    <patternset refid="excluded.from.module.scraper"/>
+  </patternset>
+  
+  <path id="scraper.module.sourcepath">
+    <dirset dir="${module.scraper.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.scraper" depends="compile.module.scraper.production,compile.module.scraper.tests" description="Compile module Scraper"/>
+  
+  <target name="compile.module.scraper.production" depends="register.custom.compilers" description="Compile module Scraper; production classes">
+    <mkdir dir="${scraper.output.dir}"/>
+    <javac2 destdir="${scraper.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.scraper}/javac">
+      <compilerarg line="${compiler.args.scraper}"/>
+      <bootclasspath refid="scraper.module.bootclasspath"/>
+      <classpath refid="scraper.module.production.classpath"/>
+      <src refid="scraper.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.scraper"/>
+    </javac2>
+    
+    <copy todir="${scraper.output.dir}">
+      <fileset dir="${module.scraper.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.scraper.tests" depends="register.custom.compilers,compile.module.scraper.production" description="compile module Scraper; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.scraper" description="cleanup module">
+    <delete dir="${scraper.output.dir}"/>
+    <delete dir="${scraper.testoutput.dir}"/>
+  </target>
+</project>
